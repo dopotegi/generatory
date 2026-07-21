@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Generatory Do Potęgi</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Khand:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--blue:#3300CC;--red:#E30613;--bg:#f7f6ff;--ink:#171717;--muted:#666;--card:#fff}
+*{box-sizing:border-box}
+body{margin:0;font-family:'Khand',system-ui,sans-serif;background:linear-gradient(180deg,#fff 0,#f7f6ff 100%);color:var(--ink);min-height:100vh}
+.wrap{max-width:1180px;margin:0 auto;padding:42px 20px 60px}
+.hero{text-align:center;margin-bottom:34px}
+.eyebrow{display:inline-block;color:var(--red);font-weight:700;letter-spacing:.12em;text-transform:uppercase;font-size:15px;margin-bottom:8px}
+h1{margin:0;color:var(--blue);font-size:clamp(40px,7vw,74px);line-height:.95}
+.lead{max-width:680px;margin:16px auto 0;color:var(--muted);font-size:21px;line-height:1.35}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:18px}
+.card{display:flex;flex-direction:column;min-height:240px;background:var(--card);border:2px solid rgba(51,0,204,.10);border-radius:24px;padding:24px;text-decoration:none;color:inherit;box-shadow:0 12px 35px rgba(51,0,204,.08);transition:.18s ease}
+.card:hover{transform:translateY(-4px);border-color:var(--blue);box-shadow:0 18px 42px rgba(51,0,204,.15)}
+.icon{width:58px;height:58px;border-radius:18px;background:#efeaff;color:var(--blue);display:grid;place-items:center;font-size:30px;font-weight:700;margin-bottom:20px}
+.card h2{margin:0 0 8px;font-size:30px;color:var(--blue)}
+.card p{margin:0;color:var(--muted);font-size:18px;line-height:1.35;flex:1}
+.open{margin-top:22px;font-weight:700;color:var(--red);font-size:18px}
+.footer{text-align:center;color:#777;margin-top:30px;font-size:16px}
+@media(max-width:520px){.wrap{padding-top:28px}.lead{font-size:18px}.card{min-height:210px}}
+</style>
+</head>
+<body>
+<main class="wrap">
+  <section class="hero">
+    <div class="eyebrow">Do Potęgi</div>
+    <h1>Generatory materiałów</h1>
+    <p class="lead">Wybierz generator i przygotuj gotowy materiał do wydruku lub zapisania w PDF.</p>
+  </section>
+  <section class="grid" aria-label="Lista generatorów">
+    <a class="card" href="bingo.html">
+      <div class="icon">B</div><h2>Bingo</h2><p>Tworzenie kart bingo oraz pasków do losowania.</p><div class="open">Otwórz generator →</div>
+    </a>
+    <a class="card" href="domino.html">
+      <div class="icon">D</div><h2>Domino</h2><p>Generator zazębiających się kart domina w kilku rozmiarach.</p><div class="open">Otwórz generator →</div>
+    </a>
+    <a class="card" href="ja-mam-kto-ma.html">
+      <div class="icon">J</div><h2>Ja mam – kto ma</h2><p>Tworzenie pełnego łańcucha kart do gry klasowej.</p><div class="open">Otwórz generator →</div>
+    </a>
+    <a class="card" href="memory.html">
+      <div class="icon">M</div><h2>Memory</h2><p>Generator par kart z możliwością dodania rewersów.</p><div class="open">Otwórz generator →</div>
+    </a>
+    <a class="card" href="karty-pracy.html">
+      <div class="icon">K</div><h2>Karty pracy</h2><p>Układanie zadań na estetycznej karcie pracy A4.</p><div class="open">Otwórz generator →</div>
+    </a>
+  </section>
+  <div class="footer">Wszystkie generatory w jednym miejscu.</div>
+</main>
+</body>
+</html>
