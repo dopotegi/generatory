@@ -9,19 +9,25 @@
 <script>window.MathJax = { tex: { inlineMath: [['\\(','\\)'], ['$', '$']] }, svg: { fontCache: 'global' } };</script>
 <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js" defer></script>
 <style>
-:root{ --violet:#3300CC; --red:#E30613; --ink:#111; --paper:#fff; --ui:#fafafe; --line:#e6e6ef;
-       --cols:2; --fz:18px; --wmop:0.10; --numfw:700; --txtfw:300; --instrFz:16px; --instrFw:400; }
+
+:root{
+  --violet:#3300CC; --red:#E30613; --ink:#111; --paper:#fff;
+  --ui:#fafafe; --line:#e6e6ef; --cols:2; --fz:18px;
+  --wmop:0.15; --numfw:700; --txtfw:300; --instrFz:16px; --instrFw:400;
+}
 @page{ size:A4; margin:10mm; }
 *{ box-sizing:border-box; }
-body{ margin:0; background:var(--ui); color:var(--ink); font-family:"Khand", system-ui, sans-serif; }
-header{ position:sticky; top:0; z-index:5; background:#fff; border-bottom:1px solid var(--line); padding:10px 16px; display:flex; justify-content:space-between; align-items:center; }
+html,body{ height:100%; }
+body{ margin:0; background:var(--ui); color:var(--ink); font-family:"Khand",system-ui,sans-serif; }
+header{ position:sticky; top:0; z-index:5; background:#fff; border-bottom:1px solid var(--line); padding:10px 16px; display:flex; justify-content:space-between; align-items:center; gap:12px; min-height:58px; }
 header .brand{ color:var(--violet); font-weight:700; font-size:18px; }
-header .btn{ background:#fff; border:1px solid var(--line); border-radius:12px; padding:8px 12px; cursor:pointer; font-weight:700;}
-.wrap{ display:grid; grid-template-columns:380px 1fr; gap:16px; padding:14px 16px; }
-.panel{ background:#fff; border:1px solid var(--line); border-radius:14px; padding:14px; height:max-content; position:sticky; top:58px; }
+header .btn{ white-space:nowrap; background:#fff; border:1px solid var(--line); border-radius:12px; padding:8px 12px; cursor:pointer; font-weight:700; }
+.wrap{ display:grid; grid-template-columns:380px minmax(0,1fr); gap:16px; padding:14px 16px; height:calc(100dvh - 58px); min-height:0; overflow:hidden; }
+.panel{ background:#fff; border:1px solid var(--line); border-radius:14px; padding:14px; min-height:0; height:100%; overflow-y:auto; overflow-x:hidden; scrollbar-gutter:stable; }
 .panel h2{ margin:6px 0 8px; font-size:18px; }
 label{ font-size:14px; display:block; margin:8px 0 4px; }
-input[type="text"],input[type="number"],select,textarea{ width:100%; border:1px solid var(--line); border-radius:10px; padding:8px 10px; background:#fff; font-size:14px;}
+input[type="text"],input[type="number"],select,textarea{ width:100%; border:1px solid var(--line); border-radius:10px; padding:8px 10px; background:#fff; font-size:14px; }
+textarea{ resize:vertical; }
 .controls{ display:flex; gap:12px; align-items:center; flex-wrap:wrap; }
 .checkbox{ display:flex; align-items:center; gap:8px; }
 .row{ display:flex; gap:8px; align-items:center; }
@@ -29,37 +35,55 @@ input[type="text"],input[type="number"],select,textarea{ width:100%; border:1px 
 .btn{ background:var(--violet); color:#fff; border:none; padding:9px 12px; border-radius:12px; font-weight:700; cursor:pointer; }
 .btn.alt{ background:#fff; color:#1a1a1a; border:1px solid var(--line); }
 .btn.danger{ background:#E53935; }
-
-.paper{ background:#fff; border:1px solid var(--line); border-radius:14px; min-height:260mm; }
-.page{ position:relative; height: calc(297mm - 20mm); overflow:hidden; border-radius:14px; }
-.content{ position:relative; z-index:1; padding:10mm 14mm 14mm; height:100%; display:flex; flex-direction:column; }
-.header-line{ display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:4mm; }
-.title{ font-size:26px; color:var(--violet); font-weight:700; line-height:1.1; }
-.logo{ height:120px; width:auto; object-fit:contain; }
-.instruction{ color:#111; font-size:var(--instrFz); font-weight:var(--instrFw); margin:2mm 0 5mm; }
-.wm{ position:absolute; inset:0; display:flex; align-items:center; justify-content:center; pointer-events:none; z-index:0;}
+.preview{ height:100%; min-height:0; min-width:0; overflow:auto; scrollbar-gutter:stable; padding:0 12px 16px 0; }
+.paper{ width:190mm; max-width:none; margin:0 auto; background:#fff; border:1px solid var(--line); border-radius:14px; position:relative; }
+.page{ width:190mm; height:277mm; position:relative; overflow:hidden; background:#fff; border-radius:14px; }
+.content{ position:relative; z-index:1; padding:10mm 14mm 14mm; height:100%; display:flex; flex-direction:column; min-height:0; }
+.header-line{ display:flex; justify-content:space-between; align-items:flex-start; gap:5mm; margin-bottom:4mm; flex:0 0 auto; }
+.title{ font-size:26px; color:var(--violet); font-weight:700; line-height:1.1; overflow-wrap:anywhere; }
+.logo{ height:120px; width:auto; object-fit:contain; flex:0 0 auto; }
+.instruction{ color:#111; font-size:var(--instrFz); font-weight:var(--instrFw); margin:2mm 0 5mm; flex:0 0 auto; white-space:pre-wrap; overflow-wrap:anywhere; }
+.wm{ position:absolute; inset:0; display:flex; align-items:center; justify-content:center; pointer-events:none; z-index:0; }
 .wm img{ max-width:62%; max-height:62%; opacity:var(--wmop); }
-
-.tasks{ column-count:var(--cols); column-gap:16mm; column-fill:auto; flex:1 1 auto; height:100%; max-height:100%; padding-right:3mm; overflow:hidden; }
-.task{ break-inside:avoid-column; page-break-inside:avoid; -webkit-column-break-inside:avoid; margin:0 0 7mm; font-size:var(--fz); font-weight:var(--txtfw); display:block; width:100%; max-width:100%; overflow-wrap:break-word; word-break:normal; hyphens:auto; padding-right:2mm; }
+.tasks{ display:grid; grid-template-columns:repeat(var(--cols),minmax(0,1fr)); column-gap:12mm; flex:1 1 auto; min-height:0; width:100%; align-items:stretch; }
+.task-column{ min-width:0; display:flex; flex-direction:column; align-items:stretch; }
+.task{ display:grid; grid-template-columns:max-content minmax(0,1fr); column-gap:1.5mm; align-items:baseline; flex:0 0 auto; margin:0 0 5mm; font-size:var(--fz); font-weight:var(--txtfw); line-height:1.33; width:100%; min-width:0; overflow-wrap:break-word; word-break:normal; hyphens:auto; break-inside:avoid; page-break-inside:avoid; }
 .task .num{ color:var(--violet); font-weight:var(--numfw); font-size:var(--fz); }
-.task .expr{ white-space:pre-wrap; }
-.task .expr, .task span:not(.num):not(.ans), .task .expr *,
-.task mjx-container { font-weight:var(--txtfw) !important; font-size:var(--fz) !important; }
-.task .line{ display:inline-block; border-bottom:2px solid #bdbdbd; min-width:28mm; }
-.task .ans{ color:var(--red); font-size:calc(var(--fz) * 0.95); margin-top:2mm; display:block; }
+.task .expr{ white-space:pre-wrap; min-width:0; font-weight:var(--txtfw); }
+.task mjx-container{ font-size:1em !important; max-width:100%; }
+.task .line{ display:inline-block; border-bottom:2px solid #bdbdbd; min-width:28mm; vertical-align:baseline; }
+.task .ans{ grid-column:2; color:var(--red); font-size:calc(var(--fz) * .95); margin-top:2mm; display:block; }
+.pagebreak{ height:0; page-break-before:always; break-before:page; }
+.answers{ flex:1 1 auto; display:flex; flex-direction:column; min-height:0; }
+.answers h3{ color:var(--violet); margin:0 0 4mm; flex:0 0 auto; }
+.answer-columns{ display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); column-gap:12mm; flex:1 1 auto; min-height:0; }
+.answer-column{ min-width:0; }
+.answers ol{ margin:0; padding-left:8mm; }
+.answers li{ margin:0 0 4mm; padding-left:1mm; overflow-wrap:anywhere; break-inside:avoid; }
+.measure-page{ position:absolute !important; top:0; left:-20000px; visibility:hidden; overflow:visible !important; pointer-events:none; border:0; }
+@media (max-width:1100px){ .wrap{ grid-template-columns:330px minmax(0,1fr); gap:10px; padding:10px; } }
+@media (max-width:750px){
+  header{ padding:8px 10px; } header .brand{ font-size:16px; }
+  .wrap{ display:flex; flex-direction:column; height:calc(100dvh - 58px); }
+  .panel{ flex:0 0 42%; height:auto; } .preview{ flex:1 1 auto; height:auto; }
+  .paper{ margin:0; }
+}
+@media print{
+  html,body{ width:190mm; height:auto; margin:0; padding:0; background:#fff; -webkit-print-color-adjust:exact; print-color-adjust:exact; }
+  header,.panel{ display:none !important; }
+  .wrap{ display:block; width:190mm; height:auto; overflow:visible; padding:0; margin:0; }
+  .preview{ display:block; width:190mm; height:auto; overflow:visible; padding:0; margin:0; }
+  .paper{ width:190mm; margin:0; border:0; border-radius:0; }
+  .page{ width:190mm; height:277mm; border-radius:0; break-inside:avoid; page-break-inside:avoid; }
+  .pagebreak{ page-break-before:always; break-before:page; }
+  .measure-page{ display:none !important; }
+}
 
-.pagebreak{ page-break-before:always; }
-.answers h3{ color:var(--violet); margin:0 0 4mm; }
-.answers ol{ columns:2; column-gap:16mm; }
-.answers li{ margin-bottom:4mm; }
-
-@media print{ html,body{ background:#fff; -webkit-print-color-adjust:exact; print-color-adjust:exact; } header,.panel{ display:none!important; } .wrap{ display:block; padding:0; } .paper{ border:none; } .page{ border-radius:0;} .tasks{ padding-right:4mm; } }
 </style>
 </head>
 <body>
 <header>
-  <div class="brand">Do Potęgi — Generator (tryb ręczny v7.19 — automatyczne wielostronicowanie)</div>
+  <div class="brand">Do Potęgi — Generator kart pracy</div>
   <button id="printBtn" class="btn alt">Drukuj / PDF</button>
 </header>
 
@@ -88,8 +112,8 @@ input[type="text"],input[type="number"],select,textarea{ width:100%; border:1px 
     </div>
 
     <div class="controls">
-      <label>Przezroczystość znaku wodnego: <span id="wmVal">10%</span></label>
-      <input id="wm" type="range" min="0" max="30" value="10" style="width:160px">
+      <label>Przezroczystość znaku wodnego: <span id="wmVal">15%</span></label>
+      <input id="wm" type="range" min="0" max="30" value="15" style="width:160px">
     </div>
 
     <div class="controls">
@@ -126,12 +150,13 @@ input[type="text"],input[type="number"],select,textarea{ width:100%; border:1px 
 
     <hr style="border:none;border-top:1px solid var(--line); margin:12px 0">
 
-    <h2>Tryb RĘCZNY</h2>
+    <h2>Dane zadań</h2>
     <div style="font-size:14px; color:#444; margin-bottom:6px">
-      Format: <b>zadanie,odpowiedź</b>. Zadania oddziel <b>średnikiem ;</b> lub <b>Enterem</b>.<br>
-      <span style="opacity:.8">np. 36+27=,63 ; 145-89=,56 ; 12·7=,84</span>
+      Format: <b>treść zadania | odpowiedź</b>. Oddzielaj zadania <b>średnikiem ;</b> lub <b>Enterem</b>.<br>
+      <span style="opacity:.8">Np. Jakim procentem liczby 2,5 jest liczba 0,5? | 20%</span><br>
+      <span style="opacity:.8">Starszy zapis z przecinkiem, np. 36+27=,63, także działa.</span>
     </div>
-    <textarea id="bulk" rows="7" placeholder="np. 36+27=,63 ; 145-89=,56 ; 12·7=,84"></textarea>
+    <textarea id="bulk" rows="7" placeholder="Jakim procentem liczby 2,5 jest liczba 0,5? | 20%"></textarea>
 
     <div class="controls" style="margin-top:8px">
       <button class="btn alt" id="addManual">Dodaj do listy</button>
@@ -141,7 +166,9 @@ input[type="text"],input[type="number"],select,textarea{ width:100%; border:1px 
     </div>
   </section>
 
-  <main class="paper" id="paper" aria-label="Podgląd karty pracy"></main>
+  <div class="preview" id="preview" aria-label="Przewijany podgląd kart pracy" tabindex="0">
+    <main class="paper" id="paper" aria-label="Podgląd karty pracy"></main>
+  </div>
 </div>
 
 <script>
@@ -196,16 +223,26 @@ function normalizeEscapes(s){
 function parseManual(limit){
   const raw=document.getElementById('bulk').value.trim();
   if(!raw) return [];
-  const chunks=raw.split(/;|\n/).map(s=>s.trim()).filter(Boolean);
+  const chunks=raw.split(/(?<!\\);|\r?\n/).map(s=>s.trim()).filter(Boolean);
   const out=[];
-  for(const chRaw of chunks){
-    const ch=normalizeEscapes(chRaw);
-    const idx=ch.indexOf(',');
-    let q=ch, a='';
-    if(idx>=0){ q=ch.slice(0,idx).trim(); a=ch.slice(idx+1).trim(); }
-    q=normalizeEscapes(q);
-    a=normalizeEscapes(a);
-    if(q){ out.push({q,a}); }
+  for(const rawLine of chunks){
+    const ch=normalizeEscapes(rawLine);
+    // Pionowa kreska jest podstawowym separatorem; przecinek zachowano dla starszych kart.
+    let idx=ch.lastIndexOf('|');
+    let width=1;
+    if(idx<0){
+      const commas=[...ch.matchAll(/,/g)].map(m=>m.index);
+      // Przecinki między cyframi traktujemy jako dziesiętne, nie jako separatory.
+      const delimiters=commas.filter(i=>!( /\d/.test(ch[i-1]||'') && /\d/.test(ch[i+1]||'') ));
+      if(delimiters.length){ idx=delimiters[delimiters.length-1]; }
+      else if(commas.length && !looksLikeWordTask(ch) && /[=+*·×÷\/\-]/.test(ch.slice(0,commas[0]))){
+        // Niejednoznaczny stary zapis: "12+7,19,5" => odpowiedź "19,5".
+        idx=commas[0];
+      }
+    }
+    const q=normalizeEscapes(idx<0 ? ch : ch.slice(0,idx));
+    const a=normalizeEscapes(idx<0 ? '' : ch.slice(idx+width));
+    if(q) out.push({q,a});
     if(out.length>=limit) break;
   }
   return out;
@@ -322,7 +359,7 @@ function applyUI(){
   document.documentElement.style.setProperty('--cols', cols);
   document.documentElement.style.setProperty('--fz', (base*factor)+'px');
   document.documentElement.style.setProperty('--numfw', document.getElementById('boldNums').checked ? '700':'300');
-  document.documentElement.style.setProperty('--txtfw', document.getElementById('boldText').checked ? '700':'300');
+  document.documentElement.style.setProperty('--txtfw', document.getElementById('boldText').checked ? '500':'300');
   const op = (Number(document.getElementById('wm').value)/100).toFixed(2);
   document.documentElement.style.setProperty('--wmop', op);
   document.getElementById('wmVal').textContent = Math.round(op*100)+'%';
@@ -350,214 +387,192 @@ function emptyPage(title,instr,showInstr){
   return s;
 }
 
+function setExpressionContent(el, raw){
+  const useTex=document.getElementById('useTex').checked;
+  // Zdania z wtrąceniami matematycznymi zachowują normalną czcionkę Khand.
+  const mathSegments=/(\$[^$]+\$|\\\([\s\S]*?\\\))/g;
+  const parts=String(raw||'').split(mathSegments);
+  if(useTex && parts.length>1){
+    parts.forEach((part,i)=>{
+      if(i%2===0){ el.appendChild(document.createTextNode(plainExpr(part))); }
+      else{
+        const t=document.createElement('span');
+        t.textContent=part.startsWith('$') ? `\\(${toLa(part)}\\)` : part;
+        el.appendChild(t);
+      }
+    });
+  }else if(wantsMathRender(raw)){
+    el.textContent=`\\(${toLa(raw)}\\)`;
+  }else{
+    el.textContent=plainExpr(raw);
+  }
+}
 function addTask(tasksEl, it){
-  const useTex = wantsMathRender(it.q||'');
-  const num = it.__index+1;
   const div=document.createElement('div');
   div.className='task';
-  const numSpan = `<span class="num">${num}.</span> `;
-  const ansStyle = document.getElementById('ansStyle').value;
-  let slot='';
-  if(ansStyle==='line') slot=' <span class="line">&nbsp;</span>';
-  else if(ansStyle==='eq') slot=' =';
-
-  // budujemy kontener na wyrażenie
-  const exprSpan = document.createElement('span');
-  exprSpan.className='expr';
-  if(useTex){
-    exprSpan.textContent = `\\(${toLa(it.q||'')}\\)`;
-    if(ansStyle==='line'){ const line=document.createElement('span'); line.className='line'; line.innerHTML='&nbsp;'; exprSpan.appendChild(document.createTextNode(' ')); exprSpan.appendChild(line); }
-    else if(ansStyle==='eq'){ exprSpan.appendChild(document.createTextNode(' =')); }
-  }else{
-    exprSpan.textContent = plainExpr(it.q||'');
-    if(ansStyle==='line'){ const line=document.createElement('span'); line.className='line'; line.innerHTML='&nbsp;'; exprSpan.appendChild(document.createTextNode(' ')); exprSpan.appendChild(line); }
-    else if(ansStyle==='eq'){ exprSpan.appendChild(document.createTextNode(' =')); }
-  }
-
-  div.innerHTML = numSpan;
-  div.appendChild(exprSpan);
-  const ans = document.createElement('span');
-  ans.className='ans';
-  ans.style.display = showAnswers ? 'block':'none';
-  if (wantsMathRender(it.a||'') && (it.a||'').trim()) {
-  ans.textContent = 'Odp.: ' + `\\(${toLa(it.a||'')}\\)`;
-} else {
-  ans.textContent = 'Odp.: ' + (it.a||'');
-}
-
+  div.dataset.taskIndex=String(it.__index+1);
+  const num=document.createElement('span');
+  num.className='num'; num.textContent=(it.__index+1)+'.';
+  const expr=document.createElement('span'); expr.className='expr';
+  setExpressionContent(expr,it.q||'');
+  const ansStyle=document.getElementById('ansStyle').value;
+  if(ansStyle==='line'){
+    expr.appendChild(document.createTextNode(' '));
+    const line=document.createElement('span'); line.className='line'; line.textContent=' '; expr.appendChild(line);
+  }else if(ansStyle==='eq') expr.appendChild(document.createTextNode(' ='));
+  div.append(num,expr);
+  const ans=document.createElement('span');
+  ans.className='ans'; ans.style.display=showAnswers?'block':'none';
+  ans.textContent=(it.a||'') ? 'Odp.: ' + (wantsMathRender(it.a||'') ? `\\(${toLa(it.a)}\\)` : it.a) : 'Odp.: ';
   div.appendChild(ans);
-
-  tasksEl.appendChild(div); 
+  tasksEl.appendChild(div);
   return div;
 }
 
-
-
-function pageOverflow(content, tasks){
-  const verticalOverflow = content.scrollHeight > content.clientHeight + 1;
-  const horizontalOverflow = tasks.scrollWidth > tasks.clientWidth + 1;
-  return verticalOverflow || horizontalOverflow;
-}
-
-function waitForFonts(){
-  if(document.fonts && document.fonts.ready) return document.fonts.ready.catch(()=>{});
-  return Promise.resolve();
-}
-
-// Po wyrenderowaniu MathJax zadania bywają wyższe niż w surowym zapisie TeX.
-// Ta funkcja sprawdza GOTOWY wygląd stron i przenosi nadmiar na kolejne arkusze A4.
-function createTaskPageBeforeAnswers(title, instr){
-  const paper=document.getElementById('paper');
-  const answerPage=Array.from(paper.querySelectorAll('.page')).find(p=>p.querySelector('.answers'));
-  const page=emptyPage(title, instr, true);
-  const br=document.createElement('div');
-  br.className='pagebreak';
-
-  if(answerPage){
-    // przed stroną odpowiedzi znajduje się pagebreak oddzielający odpowiedzi
-    let answerBreak=answerPage.previousElementSibling;
-    if(!(answerBreak && answerBreak.classList.contains('pagebreak'))) answerBreak=answerPage;
-    paper.insertBefore(br, answerBreak);
-    paper.insertBefore(page, answerBreak);
-  }else{
-    paper.appendChild(br);
-    paper.appendChild(page);
+// Każde zadanie otrzymuje jedną rzeczywistą pozycję w kolumnie.
+// Wysokości mierzymy dopiero po załadowaniu Khand i wyrenderowaniu MathJax.
+let renderSerial=0;
+function makeColumns(tasks, n){
+  const columns=[];
+  for(let i=0;i<n;i++){
+    const col=document.createElement('div'); col.className='task-column';
+    tasks.appendChild(col); columns.push(col);
   }
+  return columns;
+}
+function makeAnswerPage(title,instr,onAnswers){
+  const page=emptyPage(title,instr,onAnswers);
+  const original=page.querySelector('.tasks');
+  const section=document.createElement('section'); section.className='answers';
+  section.innerHTML='<h3>Odpowiedzi</h3><div class="answer-columns"><div class="answer-column"><ol></ol></div><div class="answer-column"><ol></ol></div></div>';
+  original.replaceWith(section);
   return page;
 }
-
-function rebalanceRenderedTaskPages(title, instr){
-  const paper=document.getElementById('paper');
-  let guard=0;
-
-  while(guard++ < 1000){
-    const pages=Array.from(paper.querySelectorAll('.page')).filter(p=>p.querySelector('.tasks'));
-    let changed=false;
-
-    for(let i=0;i<pages.length;i++){
-      const page=pages[i];
-      const content=page.querySelector('.content');
-      const tasks=page.querySelector('.tasks');
-
-      // Przenosimy po jednym zadaniu, aż bieżąca strona naprawdę mieści się po MathJax.
-      while(pageOverflow(content, tasks) && tasks.lastElementChild){
-        const moving=tasks.lastElementChild;
-        let nextPage=pages[i+1];
-        if(!nextPage){
-          nextPage=createTaskPageBeforeAnswers(title, instr);
-          pages.push(nextPage);
-        }
-        const nextTasks=nextPage.querySelector('.tasks');
-        nextTasks.insertBefore(moving, nextTasks.firstChild);
-        changed=true;
+function attachPage(paper,page){
+  if(paper.querySelector('.page:not(.measure-page)')){
+    const br=document.createElement('div'); br.className='pagebreak'; paper.appendChild(br);
+  }
+  paper.appendChild(page);
+}
+function measuredHeight(node){
+  const rect=node.getBoundingClientRect();
+  const style=getComputedStyle(node);
+  return rect.height+(parseFloat(style.marginTop)||0)+(parseFloat(style.marginBottom)||0);
+}
+function placeTasks(paper,nodes,title,instr,mode,perPage){
+  if(!nodes.length) return {pages:0,oversized:[]};
+  const count=+document.getElementById('cols').value||2;
+  let page=null, columns=[], index=0, used=[], pageItems=0, pages=0;
+  const oversized=[];
+  function nextPage(){
+    page=emptyPage(title,instr,true);
+    attachPage(paper,page);
+    columns=makeColumns(page.querySelector('.tasks'),count);
+    used=Array(count).fill(0); index=0; pageItems=0; pages++;
+  }
+  nextPage();
+  let available=page.querySelector('.tasks').getBoundingClientRect().height;
+  for(const node of nodes){
+    let needed=measuredHeight(node);
+    if(needed>available+0.5){
+      // Wyjątkowo długie pojedyncze zadanie: zmniejsz tylko ten element,
+      // zamiast drukować zadanie ucięte na dole strony.
+      let actual=parseFloat(getComputedStyle(node).fontSize);
+      while(needed>available+0.5 && actual>10){
+        actual=Math.max(10,actual-1);
+        node.style.setProperty('--fz',actual+'px');
+        needed=measuredHeight(node);
       }
+      if(needed>available+0.5) oversized.push(node.dataset.taskIndex);
     }
-
-    if(!changed) break;
+    if(mode==='fixed' && pageItems>=perPage){ nextPage(); available=page.querySelector('.tasks').getBoundingClientRect().height; }
+    if(used[index]+needed>available+0.5 && used[index]>0){
+      index++;
+      if(index>=count){ nextPage(); available=page.querySelector('.tasks').getBoundingClientRect().height; }
+    }
+    columns[index].appendChild(node);
+    used[index]+=needed;
+    pageItems++;
   }
+  return {pages,oversized};
 }
-
-function paginateAuto(items, title, instr, instrOnAnswers){
-  const paper=document.getElementById('paper'); paper.innerHTML='';
-  let page=emptyPage(title, instr, true); paper.appendChild(page);
-  let tasks=page.querySelector('.tasks'); let content=page.querySelector('.content');
-
-  items.forEach(it=>{
-    const node=addTask(tasks, it);
-    if(pageOverflow(content, tasks)){
-      tasks.removeChild(node);
-      const br=document.createElement('div'); br.className='pagebreak'; paper.appendChild(br);
-      page=emptyPage(title, instr, true); paper.appendChild(page);
-      tasks=page.querySelector('.tasks'); content=page.querySelector('.content');
-      addTask(tasks, it);
-    }
-  });
-
-  paginateAnswers(items, title, instr, instrOnAnswers);
-}
-
-function paginateFixed(items, title, instr, instrOnAnswers, perPage){
-  const paper=document.getElementById('paper'); paper.innerHTML='';
-  for(let i=0;i<items.length;i+=perPage){
-    const slice=items.slice(i,i+perPage);
-    const p=emptyPage(title, instr, true); paper.appendChild(p);
-    const tasks=p.querySelector('.tasks'); slice.forEach(it=>addTask(tasks, it));
-    if(i+perPage<items.length){ const br=document.createElement('div'); br.className='pagebreak'; paper.appendChild(br); }
+function placeAnswers(paper,nodes,title,instr,onAnswers){
+  if(!nodes.length) return 0;
+  let page=null, columns=[], used=[], index=0, pages=0, available=0;
+  function nextPage(){
+    page=makeAnswerPage(title,instr,onAnswers); attachPage(paper,page);
+    columns=Array.from(page.querySelectorAll('.answers ol'));
+    used=[0,0]; index=0; pages++;
+    available=page.querySelector('.answer-columns').getBoundingClientRect().height;
   }
-  paginateAnswers(items, title, instr, instrOnAnswers);
-}
-
-
-function paginateAnswers(items, title, instr, instrOnAnswers){
-  if(!items.length) return;
-  const paper=document.getElementById('paper');
-  // page break before answers section
-  const br=document.createElement('div'); br.className='pagebreak'; paper.appendChild(br);
-  // create first answers page
-  let page=emptyPage(title, instr, !!instrOnAnswers); paper.appendChild(page);
-  let content=page.querySelector('.content');
-  let tasks=page.querySelector('.tasks');
-  let answersSection=document.createElement('section');
-  answersSection.className='answers';
-  answersSection.innerHTML='<h3>Odpowiedzi</h3><ol></ol>';
-  tasks.replaceWith(answersSection);
-  let ol=answersSection.querySelector('ol');
-  let startIndex=1;
-  ol.start=startIndex;
-
-  const useTexForAnswers=(txt)=>wantsMathRender(txt);
-
-  for(let i=0;i<items.length;i++){
-    const it=items[i];
-    const li=document.createElement('li');
-    if(useTexForAnswers(it.a||'') && (it.a||'').trim()){
-      li.textContent = `\\(${toLa(it.a||'')}\\)`;
-    } else {
-      li.textContent = it.a || '';
+  nextPage();
+  for(const node of nodes){
+    const needed=measuredHeight(node);
+    if(used[index]+needed>available+0.5 && used[index]>0){
+      index++;
+      if(index>=2) nextPage();
     }
-    ol.appendChild(li);
-
-    // overflow check
-    if(pageOverflow(content, tasks)){
-      // move li to a new page
-      ol.removeChild(li);
-      // new page
-      const br2=document.createElement('div'); br2.className='pagebreak'; paper.appendChild(br2);
-      page=emptyPage(title, instr, !!instrOnAnswers); paper.appendChild(page);
-      content=page.querySelector('.content');
-      tasks=page.querySelector('.tasks');
-      answersSection=document.createElement('section');
-      answersSection.className='answers';
-      answersSection.innerHTML='<h3>Odpowiedzi</h3><ol></ol>';
-      tasks.replaceWith(answersSection);
-      ol=answersSection.querySelector('ol');
-      startIndex=i+1; // next number
-      ol.start=startIndex;
-      ol.appendChild(li);
-    }
+    columns[index].appendChild(node);
+    used[index]+=needed;
   }
+  return pages;
 }
-async function render(second=false){
+async function waitForFonts(){
+  if(document.fonts && document.fonts.ready) await document.fonts.ready.catch(()=>{});
+}
+async function render(){
+  const serial=++renderSerial;
   applyUI();
+  const paper=document.getElementById('paper');
+  if(window.MathJax && MathJax.typesetClear){
+    try{ MathJax.typesetClear([paper]); }catch(e){ console.warn(e); }
+  }
+  paper.replaceChildren();
   const title=document.getElementById('title').value||'Karta pracy';
   const instr=document.getElementById('instructionInput').value.trim();
-  const instrOnAnswers=document.getElementById('instructionOnAnswers').checked;
-  const items=list.map((x,i)=>Object.assign({__index:i},x));
-  const mode=document.getElementById('pagingMode').value;
-  if(mode==='fixed'){
-    const per=Math.max(1, Math.min(200, +document.getElementById('perPage').value||16));
-    paginateFixed(items,title,instr,instrOnAnswers,per);
-  }else{
-    paginateAuto(items,title,instr,instrOnAnswers);
-  }
-  const needsTex = items.some(it => wantsMathRender(it.q||'') || (wantsMathRender(it.a||'') && (it.a||'').trim()));
+  const onAnswers=document.getElementById('instructionOnAnswers').checked;
+  const items=list.map((it,i)=>({...it,__index:i}));
+  if(!items.length) return;
+  const measure=emptyPage(title,instr,true);
+  measure.classList.add('measure-page');
+  paper.appendChild(measure);
+  const stageCols=makeColumns(measure.querySelector('.tasks'),+document.getElementById('cols').value||2);
+  const taskNodes=items.map(it=>addTask(stageCols[0],it));
+  const answerMeasure=makeAnswerPage(title,instr,onAnswers);
+  answerMeasure.classList.add('measure-page');
+  paper.appendChild(answerMeasure);
+  const stageAnswer=answerMeasure.querySelector('ol');
+  const answerNodes=items.map(it=>{
+    const li=document.createElement('li');
+    li.value=it.__index+1;
+    li.dataset.answerIndex=String(li.value);
+    li.textContent=it.a && wantsMathRender(it.a) ? `\\(${toLa(it.a)}\\)` : (it.a||'');
+    stageAnswer.appendChild(li);
+    return li;
+  });
   await waitForFonts();
-  if(needsTex){ await typeset(); }
-
-  // Kluczowa poprawka v7.19: decyzję o liczbie stron podejmujemy także PO MathJax,
-  // czyli na podstawie faktycznej wysokości pierwiastków, ułamków, potęg itd.
-  if(mode==='auto'){
-    rebalanceRenderedTaskPages(title, instr);
+  if(serial!==renderSerial) return;
+  const needTex=document.getElementById('useTex').checked;
+  if(needTex && window.MathJax){
+    try{
+      if(MathJax.startup?.promise) await MathJax.startup.promise;
+      if(MathJax.typesetPromise) await MathJax.typesetPromise([measure,answerMeasure]);
+    }catch(e){ console.error('Nie udało się wyrenderować MathJax:',e); }
+  }
+  if(serial!==renderSerial) return;
+  const mode=document.getElementById('pagingMode').value;
+  const perPage=Math.max(1,Math.min(200,+document.getElementById('perPage').value||16));
+  const taskResult=placeTasks(paper,taskNodes,title,instr,mode,perPage);
+  placeAnswers(paper,answerNodes,title,instr,onAnswers);
+  measure.remove(); answerMeasure.remove();
+  // Asercja integralności chroni przed niezauważalnym gubieniem zadania przy druku.
+  const taskIds=[...paper.querySelectorAll('.task[data-task-index]')].map(el=>+el.dataset.taskIndex);
+  const answerIds=[...paper.querySelectorAll('.answers li[data-answer-index]')].map(el=>+el.dataset.answerIndex);
+  const valid=items.length===taskIds.length && items.length===answerIds.length &&
+    items.every((_,i)=>taskIds[i]===i+1 && answerIds[i]===i+1);
+  if(!valid) console.error('Nieprawidłowa numeracja lub liczba zadań/odpowiedzi!',{taskIds,answerIds});
+  if(taskResult.oversized.length){
+    console.warn('Zadania zbyt długie na pojedynczą stronę A4:',taskResult.oversized);
   }
 }
 
@@ -568,7 +583,7 @@ document.getElementById('addManual').addEventListener('click', async ()=>{
 document.getElementById('clearList').addEventListener('click', async ()=>{ list=[]; document.getElementById('bulk').value=''; await render(); });
 document.getElementById('build').addEventListener('click', async ()=>{
   const added=parseManual(2000); if(added.length){ list.push(...added); document.getElementById('bulk').value=''; }
-  await render(); window.scrollTo({top:0,behavior:'smooth'});
+  await render(); document.getElementById('preview').scrollTo({top:0,behavior:'smooth'});
 });
 document.getElementById('toggleAns').addEventListener('click', async ()=>{ showAnswers=!showAnswers; await render(); });
 
@@ -594,7 +609,7 @@ document.getElementById('printBtn').addEventListener('click', async ()=>{
     await render();
     await waitForFonts();
     syncDocumentTitleWithCardTitle();
-    setTimeout(()=>window.print(),250);
+    window.print();
   }catch(err){
     console.error(err);
     alert('Wystąpił błąd podczas przygotowania wydruku.');
