@@ -114,6 +114,7 @@ textarea{min-height:108px;resize:vertical;font-size:17px;line-height:1.25}
 .sheet.takehome-measure .takehome-task{font-size:12pt!important}
 .sheet.takehome-measure .takehome-number{font-size:14pt!important}
 @media print{.takehome-list{flex:0 0 auto!important}}
+.sheet{position:relative}.material-print-id{position:absolute;right:9mm;bottom:2mm;font:600 9pt Khand,sans-serif;color:#3300cc;z-index:8}@media print{.material-print-id{font-size:8pt}}
 </style>
 </head>
 <body>
@@ -150,6 +151,7 @@ Przykład:
 
 Możesz używać zapisu matematycznego MathJax, np. \(\frac{3}{4}\), \(2^3\), \(7\frac{3}{7}\).</div>
     <textarea id="dataInput" style="margin-top:10px;min-height:340px;"></textarea>
+<div class="route-export" style="margin-top:15px;padding:15px;background:#fff;border:1px solid #d8d3f6;border-radius:14px"><strong>Powiązanie z Centrum Misji</strong><div id="materialIdentity" style="margin:8px 0">Nowy zestaw — kod zostanie nadany przy zapisie lub druku.</div><div style="display:flex;gap:8px;flex-wrap:wrap"><button type="button" id="newMaterial">Nowy zestaw</button><button type="button" id="prepareMission">Przygotuj misję</button><button type="button" id="materialLibrary">Biblioteka zestawów</button></div><div id="generatorLibrary" hidden style="margin-top:10px"></div></div>
     <div class="route-export" style="margin-top:18px;padding:16px;border:1px solid #dcd7f6;border-radius:14px;background:#faf9ff;">
       <label for="routeExport" style="display:block;margin-bottom:6px;">Kolejność stacji do skopiowania</label>
       <div class="helper" style="margin-bottom:8px;">Trasa według poprawnych odpowiedzi, od stacji 1. Numery oddzielone przecinkami.</div>
@@ -406,7 +408,7 @@ async function renderAll(){
   await typeset(previewArea);
   paginateTakeHome();
 }
-async function printNow(){ await renderAll(); if(parseStations(dataInput.value).errors.length){alert('Popraw wszystkie błędy danych stacji przed drukowaniem. Szczegóły znajdziesz w podglądzie.');return;} await lastTypeset; window.print(); }
+async function printNow(){ try{await commitMaterial();}catch(e){alert(e.message);return;} await renderAll(); if(parseStations(dataInput.value).errors.length){alert('Popraw wszystkie błędy danych stacji przed drukowaniem. Szczegóły znajdziesz w podglądzie.');return;} await lastTypeset; window.print(); }
 el('watermarkOpacity').addEventListener('input', ()=>{ const value=el('watermarkOpacity').value; document.documentElement.style.setProperty('--watermark-opacity',String(Number(value)/100)); el('watermarkValue').textContent=value+'%'; });
 el('copyRouteBtn').addEventListener('click', async ()=>{
   const field=el('routeExport');
@@ -422,7 +424,28 @@ el('renderBtn').addEventListener('click', renderAll);
 el('printBtn').addEventListener('click', printNow);
 ['titleInput','subtitleInput','instructionInput','routeCopies','cardsPerPage'].forEach(id=>el(id).addEventListener('input', ()=>{ renderAll(); }));
 dataInput.addEventListener('input', ()=>{ clearTimeout(window.__r); window.__r = setTimeout(renderAll, 180); });
-window.addEventListener('load', ()=>{ dataInput.value = demoData; renderAll(); });
+window.addEventListener('load', ()=>{let p=new URLSearchParams(location.hash.slice(1));if(p.has('material')){try{let r=libRead().materials.find(x=>x.materialId===p.get('material')&&x.version===Number(p.get('v')));if(!r)throw Error('Nie znaleziono zestawu w tej przeglądarce. Zaimportuj bibliotekę.');materialId=r.materialId;materialVersion=r.version;materialHash=r.sourceHash;restoreSnapshot(r.generatorSnapshot);}catch(e){alert(e.message);dataInput.value=demoData;}}else{dataInput.value=demoData;}renderAll();updateIdentity();});
+
+const LIB_KEY='doPotegiMaterialyMisjeV1';
+function libRead(){let s=localStorage.getItem(LIB_KEY);if(!s)return {schemaVersion:1,materials:[]};let x=JSON.parse(s);if(x.schemaVersion!==1||!Array.isArray(x.materials))throw Error('Nieprawidłowy format biblioteki.');return x;}
+function libWrite(x){try{localStorage.setItem(LIB_KEY,JSON.stringify(x));}catch(e){throw Error('Nie można zapisać biblioteki w tej przeglądarce: '+e.message);}}
+function libDownload(x,name){let u=URL.createObjectURL(new Blob([JSON.stringify(x,null,2)],{type:'application/json'}));let a=document.createElement('a');a.href=u;a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(u),2000);}
+function libImport(x){if(!x||x.schemaVersion!==1||!Array.isArray(x.materials))throw Error('Nieprawidłowa kopia biblioteki.');let lib=libRead();let added=0,updated=0;for(let r of x.materials){if(!r.materialId||!Number.isInteger(r.version)||!Array.isArray(r.sequence)||!r.code)throw Error('Kopia zawiera niekompletny rekord.');let i=lib.materials.findIndex(z=>z.materialId===r.materialId&&z.version===r.version);if(i<0){lib.materials.push(r);added++;}else if(JSON.stringify(lib.materials[i])!==JSON.stringify(r)&&confirm('Konflikt: '+r.code+' (wersja '+r.version+'). Zastąpić lokalny rekord wersją z kopii?')){lib.materials[i]=r;updated++;}}libWrite(lib);return {added,updated};}
+function libPanel(container,onOpen){const lib=libRead();let html='<div style="margin:12px 0"><input id="libQuery" placeholder="Szukaj po kodzie lub tytule" style="width:100%;padding:10px"></div><div id="libEntries"></div>';container.innerHTML=html;let query=container.querySelector('#libQuery'),list=container.querySelector('#libEntries');function draw(){let q=query.value.toLocaleLowerCase('pl');list.innerHTML='';lib.materials.filter(r=>(r.code+' '+r.title).toLocaleLowerCase('pl').includes(q)).sort((a,b)=>b.updatedAt.localeCompare(a.updatedAt)).forEach(r=>{let row=document.createElement('div');row.style='border-bottom:1px solid #ddd;padding:12px 0';row.innerHTML='<strong>'+String(r.code).replace(/</g,'&lt;')+' · v'+r.version+'</strong> — '+String(r.title).replace(/</g,'&lt;')+'<div>'+r.stationCount+' stacji · '+(r.missionSettings?'Misja gotowa':'Do skonfigurowania')+'</div>';let actions=document.createElement('div');actions.style='display:flex;gap:7px;flex-wrap:wrap;margin-top:7px';for(let [label,action] of [['Karta pracy','card'],['Edytuj misję','edit'],['Uruchom misję','play'],['Usuń','delete']]){if(action==='play'&&!r.missionSettings)continue;let b=document.createElement('button');b.type='button';b.textContent=label;b.onclick=()=>{if(action==='delete'){if(confirm('Usunąć '+r.code+' v'+r.version+'?')){lib.materials=lib.materials.filter(z=>z!==r);libWrite(lib);draw();}}else onOpen(r,action)};actions.appendChild(b)}row.appendChild(actions);list.appendChild(row)});if(!list.children.length)list.textContent='Brak pasujących zestawów.';}query.oninput=draw;draw();}
+
+let materialId=null,materialVersion=1,materialHash=null,materialCode=null;
+function materialSnapshot(){return Object.fromEntries(['titleInput','subtitleInput','instructionInput','routeCopies','cardsPerPage','watermarkOpacity','dataInput'].map(id=>[id,el(id).value]));}
+function restoreSnapshot(s){if(!s)throw Error('Brak zapisanej karty.');for(let [k,v] of Object.entries(s))if(el(k))el(k).value=v;el('watermarkOpacity').dispatchEvent(new Event('input'));}
+function taskFingerprint(){return JSON.stringify({data:dataInput.value.trim().replace(/\r\n/g,'\n'),title:el('titleInput').value,subtitle:el('subtitleInput').value,instruction:el('instructionInput').value});}
+async function hashTasks(){let b=new TextEncoder().encode(taskFingerprint());if(crypto.subtle){let a=await crypto.subtle.digest('SHA-256',b);return Array.from(new Uint8Array(a),v=>v.toString(16).padStart(2,'0')).join('');}let h=2166136261;for(let c of b)h=Math.imul(h^c,16777619);return 'local-'+(h>>>0).toString(16);}
+function updateIdentity(){el('materialIdentity').textContent=materialCode?'Kod zestawu: '+materialCode+' · wersja '+materialVersion:'Nowy zestaw — kod zostanie nadany przy zapisie lub druku.';}
+function freshCode(lib){let c;do{let a=new Uint8Array(5);crypto.getRandomValues(a);c='MIS-'+Array.from(a,x=>x.toString(16).padStart(2,'0')).join('').toUpperCase();}while(lib.materials.some(r=>r.code===c));return c;}
+async function commitMaterial(){let {stations,errors}=parseStations(dataInput.value);if(errors.length||!stations.length)throw Error('Popraw błędy stacji przed zapisaniem. '+errors.slice(0,2).join(' '));let seq=routeOrder(stations).map(String);if(seq.length!==stations.length||!seq.includes('1'))throw Error('Trasa musi obejmować wszystkie stacje i rozpoczynać się od stacji 1.');let hash=await hashTasks(),lib=libRead(),now=new Date().toISOString();if(!materialId){materialId=crypto.randomUUID?crypto.randomUUID():Date.now()+'-'+Math.random();materialVersion=1;materialCode=freshCode(lib);}let same=lib.materials.find(r=>r.materialId===materialId&&r.version===materialVersion);if(same&&same.sourceHash!==hash){materialVersion=Math.max(...lib.materials.filter(r=>r.materialId===materialId).map(r=>r.version))+1;same=null;}if(!same){same={materialId,code:materialCode,version:materialVersion,createdAt:now,missionSettings:null};lib.materials.push(same);}Object.assign(same,{title:el('titleInput').value,sourceHash:hash,stationCount:stations.length,sequence:seq,generatorSnapshot:materialSnapshot(),updatedAt:now});libWrite(lib);materialHash=hash;updateIdentity();return same;}
+function addPrintIdentity(){document.querySelectorAll('#previewArea .sheet').forEach(s=>{let d=s.querySelector('.material-print-id');if(!d){d=document.createElement('div');d.className='material-print-id';s.appendChild(d);}d.textContent=materialCode?'Kod zestawu: '+materialCode+' · wersja '+materialVersion:'';});}
+const originalRenderAll=renderAll;renderAll=async function(){await originalRenderAll();addPrintIdentity();};
+el('newMaterial').onclick=()=>{materialId=null;materialVersion=1;materialCode=null;materialHash=null;updateIdentity();};
+el('prepareMission').onclick=async()=>{let w=null;if(location.protocol!=='file:')w=window.open('about:blank','_blank');try{let r=await commitMaterial();if(location.protocol==='file:'){libDownload({schemaVersion:1,materials:[r]},r.code+'_biblioteka.json');alert('Zapisano zestaw i pobrano plik do importu w Centrum Misji. Lokalne pliki nie współdzielą biblioteki ze stroną internetową.');return;}let u='https://dopotegi.github.io/tablice/centrum_misji.html#material='+encodeURIComponent(r.materialId)+'&v='+r.version;if(w)w.location.href=u;else prompt('Otwórz ten link:',u);}catch(e){if(w)w.close();alert(e.message)}};
+el('materialLibrary').onclick=()=>{let p=el('generatorLibrary');p.hidden=!p.hidden;if(!p.hidden)try{libPanel(p,(r,action)=>{if(action==='card'){materialId=r.materialId;materialVersion=r.version;materialCode=r.code;materialHash=r.sourceHash;restoreSnapshot(r.generatorSnapshot);updateIdentity();renderAll();p.hidden=true;}else{location.href='https://dopotegi.github.io/tablice/centrum_misji.html#material='+encodeURIComponent(r.materialId)+'&v='+r.version+(action==='play'?'&play=1':'');}});}catch(e){alert(e.message)}};
 </script>
 </body>
 </html>
