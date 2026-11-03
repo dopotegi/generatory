@@ -288,8 +288,25 @@ function ops(){let a=$$('.op:checked').map(x=>x.value);return a.length?a:['add']
 function carry(a,b){while(a||b){if(a%10+b%10>=10)return true;a=Math.floor(a/10);b=Math.floor(b/10)}return false}
 function borrow(a,b){while(a||b){if(a%10<b%10)return true;a=Math.floor(a/10);b=Math.floor(b/10)}return false}
 function mk(op,min,max){
- if(op==='add'){for(let i=0;i<200;i++){let a=ri(min,max),b=ri(min,max);if($('#carry').checked&&!carry(a,b))continue;return{op,a,b,ans:a+b}}}
- if(op==='sub'){for(let i=0;i<200;i++){let a=ri(min,max),b=ri(min,max);if(b>a)[a,b]=[b,a];if($('#borrow').checked&&!borrow(a,b))continue;return{op,a,b,ans:a-b}}}
+ // Checkbox określa wymagany typ działania w obu stanach (z przeniesieniem/pożyczaniem albo bez).
+ if(op==='add'||op==='sub'){
+   const required=op==='add'?$('#carry').checked:$('#borrow').checked;
+   const valid=(a,b)=>op==='add'?carry(a,b)===required:borrow(a,b)===required;
+   const result=(a,b)=>({op,a,b,ans:op==='add'?a+b:a-b});
+   for(let i=0;i<5000;i++){
+     let a=ri(min,max),b=ri(min,max);
+     if(op==='sub'&&b>a)[a,b]=[b,a];
+     if(valid(a,b))return result(a,b);
+   }
+   // Przy wąskim zakresie sprawdzamy wszystkie pary zamiast losowo omijać rzadkie przypadki.
+   if(max-min<=1000){
+     for(let a=min;a<=max;a++)for(let b=min;b<=max;b++){
+       if(op==='sub'&&b>a)continue;
+       if(valid(a,b))return result(a,b);
+     }
+   }
+   throw new Error(`Nie można dobrać działania ${op==='add'?'dodawania':'odejmowania'} ${required?(op==='add'?'z przekroczeniem progu':'z pożyczaniem'):(op==='add'?'bez przekroczenia progu':'bez pożyczania')} w podanym zakresie. Zmień zakres liczb lub warunek.`);
+ }
  if(op==='mul'){let m=$('#mulDigits').value,d=m==='mix'?ri(1,3):+m,lo=d===1?2:10**(d-1),hi=10**d-1,b=ri(lo,hi),a=ri(min,max);return{op,a,b,ans:a*b}}
  if(op==='div'){let kind=$('#divKind').value;if(kind==='mix')kind=Math.random()<.5?'exact':'rem';let dm=$('#divDigits').value,d=dm==='mix'?ri(1,3):+dm,lo=d===1?2:10**(d-1),hi=10**d-1,b=ri(lo,hi);
    if(max<=b){b=Math.max(2,Math.min(hi,max-1));}
@@ -329,7 +346,12 @@ function generate(){
    }catch(e){problems=[];$('#summary').innerHTML='';$('#pages').innerHTML='';$('#customError').textContent=e.message;$('#customError').classList.remove('hidden');return}
  }
  let n=Math.max(1,Math.min(500,+$('#count').value||20)),min=Math.max(0,+$('#minN').value||0),max=Math.max(min+1,+$('#maxN').value||9999),o=ops(),seen=new Set();problems=[];
- for(let i=0;i<n;i++){let p,t=0;do{p=mk(o[i%o.length],min,max);t++}while(seen.has(`${p.op}-${p.a}-${p.b}`)&&t<100);seen.add(`${p.op}-${p.a}-${p.b}`);problems.push(p)}
+ try{
+   for(let i=0;i<n;i++){let p,t=0;do{p=mk(o[i%o.length],min,max);t++}while(seen.has(`${p.op}-${p.a}-${p.b}`)&&t<100);seen.add(`${p.op}-${p.a}-${p.b}`);problems.push(p)}
+ }catch(e){
+   problems=[];$('#summary').innerHTML='';$('#pages').innerHTML='';
+   $('#customError').textContent=e.message;$('#customError').classList.remove('hidden');return;
+ }
  for(let i=problems.length-1;i>0;i--){let j=ri(0,i);[problems[i],problems[j]]=[problems[j],problems[i]]}
  bi=0;$('#summary').innerHTML=`<b>${problems.length}</b> przykładów. Działania: ${o.join(', ')}.`;renderPages();renderBoard()
 }
