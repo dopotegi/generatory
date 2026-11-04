@@ -107,7 +107,7 @@ h1{margin:0;color:var(--blue);font-size:clamp(40px,7vw,74px);line-height:.95}
 const input=document.getElementById('search');
 const cards=[...document.querySelectorAll('.card')];
 
-// Wyszukiwanie bez rozróżniania wielkości liter i polskich znaków.
+// Wyszukiwanie wyłącznie po nazwie, bez rozróżniania wielkości liter i polskich znaków.
 const normalizeSearch = text => String(text || '')
   .toLocaleLowerCase('pl-PL')
   .replace(/ł/g, 'l')
@@ -118,7 +118,7 @@ const normalizeSearch = text => String(text || '')
 
 const searchableCards = cards.map(card => ({
   card,
-  text: normalizeSearch(`${card.dataset.name || ''} ${card.querySelector('h2')?.textContent || ''} ${card.querySelector('p')?.textContent || ''}`)
+  text: normalizeSearch(card.querySelector('h2')?.textContent || card.dataset.name || '')
 }));
 
 input.addEventListener('input', () => {
