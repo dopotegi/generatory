@@ -108,6 +108,17 @@ textarea{min-height:108px;resize:vertical;font-size:17px;line-height:1.25}
 .takehome-number{font-weight:700;color:#3300cc;font-size:16pt}
 .takehome-question{min-width:0;overflow-wrap:anywhere}
 @media print{.takehome-task{font-size:12pt}.takehome-number{font-size:14pt}.takehome-list{gap:3mm}}
+/* Kompaktowa lista zadań wraz z wariantami odpowiedzi i kierunkami przejścia. */
+.takehome-full-list{gap:3mm}
+.takehome-full-task{display:grid;grid-template-columns:10mm minmax(0,1fr);gap:2mm;align-items:start;break-inside:avoid;page-break-inside:avoid;font-size:12pt;line-height:1.3}
+.takehome-full-task .takehome-number{font-size:13pt}
+.takehome-full-content{min-width:0;overflow-wrap:anywhere}
+.takehome-full-answers{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));column-gap:5mm;row-gap:.6mm;margin-top:1.5mm;font-size:10.5pt}
+.takehome-full-answer{display:grid;grid-template-columns:5mm minmax(0,1fr) auto;gap:1mm;align-items:start;min-width:0}
+.takehome-full-letter{font-weight:700;color:#3300cc}
+.takehome-full-text{min-width:0;overflow-wrap:anywhere}
+.takehome-full-next{white-space:nowrap;font-weight:600;padding-left:2mm}
+@media print{.takehome-full-task{font-size:11pt}.takehome-full-task .takehome-number{font-size:12pt}.takehome-full-answers{font-size:10pt}.takehome-full-list{gap:2.5mm}}
 /* Pomiar w wymiarach wydruku, niezależny od szerokości okna. */
 .sheet.takehome-measure{position:absolute!important;left:-20000px!important;top:0!important;visibility:hidden!important;width:210mm!important;height:297mm!important;min-height:297mm!important;padding:8mm!important;border:0!important;border-radius:0!important;box-shadow:none!important;margin:0!important;display:flex!important;flex-direction:column!important;overflow:hidden!important}
 .sheet.takehome-measure .page-title{font-size:14.5mm!important}
@@ -115,6 +126,10 @@ textarea{min-height:108px;resize:vertical;font-size:17px;line-height:1.25}
 .sheet.takehome-measure .takehome-list{gap:3mm!important;flex:0 0 auto!important}
 .sheet.takehome-measure .takehome-task{font-size:12pt!important}
 .sheet.takehome-measure .takehome-number{font-size:14pt!important}
+.sheet.takehome-measure .takehome-full-list{gap:2.5mm!important}
+.sheet.takehome-measure .takehome-full-task{font-size:11pt!important}
+.sheet.takehome-measure .takehome-full-task .takehome-number{font-size:12pt!important}
+.sheet.takehome-measure .takehome-full-answers{font-size:10pt!important}
 @media print{.takehome-list{flex:0 0 auto!important}}
 </style>
 </head>
@@ -384,10 +399,21 @@ function renderTakeHomePages(stations){
   const tasks=sorted.map(s=>`<div class="takehome-task"><div class="takehome-number">${escapeHtml(s.number)}.</div><div class="takehome-question">${s.question}</div></div>`).join('');
   return buildSheet(pageHeader(el('titleInput').value,'Zadania ze stacji')+`<div class="takehome-list">${tasks}</div>`);
 }
+function renderTakeHomeFullPages(stations){
+  const sorted=[...stations].sort((a,b)=>Number(a.number)-Number(b.number) || String(a.number).localeCompare(String(b.number),'pl'));
+  const tasks=sorted.map(s=>{
+    const answers=s.answers.map(a=>`<div class="takehome-full-answer"><span class="takehome-full-letter">${escapeHtml(a.letter)}.</span><span class="takehome-full-text">${preserveMathUnits(a.text)}</span><span class="takehome-full-next">→ ${escapeHtml(a.next)}</span></div>`).join('');
+    return `<div class="takehome-full-task"><div class="takehome-number">${escapeHtml(s.number)}.</div><div class="takehome-full-content"><div class="takehome-question">${preserveMathUnits(s.question)}</div><div class="takehome-full-answers">${answers}</div></div></div>`;
+  }).join('');
+  return buildSheet(pageHeader(el('titleInput').value,'Zadania i odpowiedzi – wersja do zeszytu')+`<div class="takehome-list takehome-full-list">${tasks}</div>`);
+}
 // Podział po wyrenderowaniu MathJax: liczy się rzeczywista wysokość każdego zadania.
 function paginateTakeHome(){
-  const first=previewArea.querySelector('.takehome-list');
-  if(!first) return;
+  // Każdy z dwóch wariantów listy ma własną paginację.
+  const lists=Array.from(previewArea.querySelectorAll('.takehome-list'));
+  lists.forEach(first=>paginateOneTakeHome(first));
+}
+function paginateOneTakeHome(first){
   const sheet=first.closest('.sheet');
   const tasks=Array.from(first.children);
   if(!tasks.length) return;
@@ -446,7 +472,7 @@ async function renderAll(){
   if(!stations.length){ previewArea.innerHTML = errors.length ? `<div class="errbox">${errors.map(e=>escapeHtml(e)).join('<br>')}</div>` : '<div class="empty">Tu pojawi się gotowy podgląd kart stacji, kart ucznia i klucza odpowiedzi.</div>'; return; }
   let html=''; if(errors.length) html += `<div class="errbox">${errors.map(e=>escapeHtml(e)).join('<br>')}</div>`;
   if(duplicateWarnings.length) html += `<div class="errbox">${duplicateWarnings.map(w=>escapeHtml(w)).join('<br>')}</div>`;
-  if(!errors.length) html += renderStationPages(stations) + renderRoutePages(stations) + renderTakeHomePages(stations) + renderKeyPage(stations);
+  if(!errors.length) html += renderStationPages(stations) + renderRoutePages(stations) + renderTakeHomePages(stations) + renderTakeHomeFullPages(stations) + renderKeyPage(stations);
   previewArea.innerHTML = html;
   await typeset(previewArea);
   paginateTakeHome();
