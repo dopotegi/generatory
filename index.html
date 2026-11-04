@@ -107,12 +107,11 @@ h1{margin:0;color:var(--blue);font-size:clamp(40px,7vw,74px);line-height:.95}
 const input=document.getElementById('search');
 const cards=[...document.querySelectorAll('.card')];
 
-// Wyszukiwanie wyłącznie po nazwie, bez rozróżniania wielkości liter i polskich znaków.
+// Wyszukiwanie po nazwach: bez rozróżniania wielkości liter,
+// ale z zachowaniem różnic między polskimi znakami a literami bez ogonków.
 const normalizeSearch = text => String(text || '')
+  .normalize('NFC')
   .toLocaleLowerCase('pl-PL')
-  .replace(/ł/g, 'l')
-  .normalize('NFD')
-  .replace(/[\u0300-\u036f]/g, '')
   .replace(/\s+/g, ' ')
   .trim();
 
